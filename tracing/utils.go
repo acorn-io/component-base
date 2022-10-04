@@ -21,15 +21,14 @@ import (
 	"net/http"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
+	otlpgrpc "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"k8s.io/client-go/transport"
-	"k8s.io/component-base/tracing/api/v1"
+	v1 "k8s.io/component-base/tracing/api/v1"
 )
 
 // NewProvider creates a TracerProvider in a component, and enforces recommended tracing behavior
@@ -46,8 +45,7 @@ func NewProvider(ctx context.Context,
 		opts = append(opts, otlpgrpc.WithEndpoint(*tracingConfig.Endpoint))
 	}
 	opts = append(opts, otlpgrpc.WithInsecure())
-	driver := otlpgrpc.NewDriver(opts...)
-	exporter, err := otlp.NewExporter(ctx, driver)
+	exporter, err := otlpgrpc.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
